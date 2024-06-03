@@ -1,4 +1,4 @@
-name: Deploy to ECR
+name: Build and Push Docker Images to ECR
 
 on: 
   push:
@@ -47,34 +47,3 @@ jobs:
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:my_app_$IMAGE_TAG -f Dockerfile .
         # Push the my_app Docker image to Amazon ECR
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:my_app_$IMAGE_TAG
-
-    - name: Run and test 2-tier application
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: clo835-assignment1
-        IMAGE_TAG: latest
-        MYSQL_ROOT_PASSWORD: pw
-        DBUSER: root
-        DATABASE: employees
-        DBPWD: pw
-        APP_COLOR: blue
-      run: |
-        # Run the MySQL container
-        docker run -d --name my_db_container -e MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD $ECR_REGISTRY/$ECR_REPOSITORY:my_db_$IMAGE_TAG
-        echo "Pause for 10 seconds to let MySQL container start"
-        sleep 10
-        docker ps
-        # Get the IP address of the MySQL container
-        DBHOST=$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' my_db_container)
-        echo "The IP address of the my_db_container is $DBHOST"
-        # Export environment variables for the application
-        export DBHOST=$DBHOST
-        export DBPORT=3306
-        # Run the application container with the database connection details
-        docker run -d -p 80:8080 --name my_app_container -e DBHOST=$DBHOST -e DBPORT=$DBPORT -e DBUSER=$DBUSER -e DBPWD=$DBPWD -e APP_COLOR=$APP_COLOR $ECR_REGISTRY/$ECR_REPOSITORY:my_app_$IMAGE_TAG
-        echo "Pause for 10 seconds to let application container start"
-        sleep 10
-        docker ps
-        docker logs my_app_container
-        # Test the application container with detailed output
-        curl localhost -vvv
