@@ -31,7 +31,7 @@ jobs:
         cd clo835_summer2023_assignment1/
         ls -ltra
         # Build Docker image using the specified context (current directory in this case)
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f Dockerfile.
         # Unit test the Docker image
         docker run -d -p 80:8080 --name nodeapp $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         docker ps
