@@ -1,4 +1,5 @@
-name: Build and Push Docker Images to Elastic Repository
+name: Build and Push Docker Images to Elastic Repository next day
+
 
 on: 
   push:
